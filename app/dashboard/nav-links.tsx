@@ -1,7 +1,7 @@
 import {
   UserGroupIcon,
   HomeIcon,
-  DocumentDuplicateIcon,
+  DocumentDuplicateIcon, Cog8ToothIcon
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 
@@ -15,7 +15,7 @@ const links = [
     icon: DocumentDuplicateIcon,
   },
   { name: 'Customers', href: '/dashboard/customers', icon: UserGroupIcon },
-  { name: 'Customers', href: '/dashboard/customers', icon: HomeIcon },
+  { name: 'Settings', href: '/dashboard/Settings', icon: Cog8ToothIcon },
 ];
 
 export default function NavLinks() {
