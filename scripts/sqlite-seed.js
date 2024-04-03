@@ -1,4 +1,5 @@
 const sqlite3 = require('sqlite3').verbose();
+const sqlite = require('sqlite');
 const {
   invoices,
   customers,
@@ -43,7 +44,7 @@ async function seedInvoices(db) {
   try {
     await db.run(`
       CREATE TABLE IF NOT EXISTS invoices (
-        id TEXT PRIMARY KEY,
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
         customer_id TEXT NOT NULL,
         amount INTEGER NOT NULL,
         status TEXT NOT NULL,
@@ -57,16 +58,10 @@ async function seedInvoices(db) {
     for (let invoice of invoices) {
       await db.run(
         `
-        INSERT OR IGNORE INTO invoices (id, customer_id, amount, status, date)
-        VALUES (?, ?, ?, ?, ?)
+        INSERT OR IGNORE INTO invoices (customer_id, amount, status, date)
+        VALUES (?, ?, ?, ?)
       `,
-        [
-          invoice.id,
-          invoice.customer_id,
-          invoice.amount,
-          invoice.status,
-          invoice.date,
-        ],
+        [invoice.customer_id, invoice.amount, invoice.status, invoice.date],
       );
     }
 
@@ -132,35 +127,27 @@ async function seedRevenue(db) {
 
     console.log(`Seeded revenue`);
   } catch (error) {
+    console.log('pasa por aca 3');
     console.error('Error seeding revenue:', error);
     throw error;
   }
 }
 
-async function main() {
-  let db = new sqlite3.Database('./db.sqlite', (err) => {
-    if (err) {
-      console.error(err.message);
-    }
-    console.log('Connected to the SQlite database.');
-  });
+try {
+  (async function main() {
+    let db = await sqlite.open({
+      filename: './db.sqlite',
+      driver: sqlite3.Database,
+    });
 
-  await seedUsers(db);
-  await seedCustomers(db);
-  await seedInvoices(db);
-  await seedRevenue(db);
+    await seedUsers(db);
+    await seedCustomers(db);
+    await seedInvoices(db);
+    await seedRevenue(db);
 
-  await db.close((err) => {
-    if (err) {
-      console.error(err.message);
-    }
-    console.log('Closed the database connection.');
-  });
+    await db.close();
+  })();
+} catch (error) {
+  console.log('pasa por aca 2');
+  console.error('Error seeding database:', error);
 }
-
-main ().catch((err) => {
-  console.error(
-    'An error occurred while attempting to seed the database:',
-    err,
-  );
-});
